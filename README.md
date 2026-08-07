@@ -10,7 +10,7 @@ So I created **pretty-console**.
 
 It keeps the familiar `console` API while adding a few small conveniences for everyday development.
 
-### Features
+## Features
 
 * Displays deeply nested objects using [`util.inspect()`](https://nodejs.org/api/util.html#utilinspectobject-options).
 * Supports configurable log levels (`trace`, `debug`, `info`, `warn`, `error`, and `fatal`).
@@ -19,16 +19,16 @@ It keeps the familiar `console` API while adding a few small conveniences for ev
 * Configurable formatting options.
 * Lightweight with no external runtime dependencies.
 
-The goal is **not** to replace logging frameworks such as Pino or Winston, but to make the built-in `console` more pleasant to use during development.
+The goal is **not** to replace logging frameworks such as [Pino](https://www.npmjs.com/package/pino) or [Winston](https://www.npmjs.com/package/winston), but to make the built-in `console` more pleasant to use during development.
 
-### Configurations
+## Configurations
 Set the output configuration using `PrettyConsole.setConfig()`.
 Key settings.<br>
 The 'breakLength' option and what follows are options that are passed directly 
-to the Configuration Options of util.inspect(). You can also specify 
+to the Configuration Options of [`util.inspect()`](https://nodejs.org/api/util.html#utilinspectobject-options). You can also specify 
 Configuration Options for util.inspect() that are not described here. 
 For more information, see the description of 
-[util.inspect() Configuration Options](https://nodejs.org/api/util.html#utilinspectobject-options).
+[`util.inspect()` Configuration Options](https://nodejs.org/api/util.html#utilinspectobject-options).
 | option        | 型 | 内容        | Default                |
 | ------------- | --------- | --------- | ---------------- |
 | `level`       | `string` | log level<br>Valid values: 'trace', 'debug', 'info', 'warn', 'error', 'fatal'<br>Level order: 'trace' < 'debug' < 'info' < 'warn' < 'error' < 'fatal'    | `'info'`      |
