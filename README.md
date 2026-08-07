@@ -35,10 +35,12 @@ For more information, see the description of
 | option        | 型 | 内容        | Default                |
 | ------------- | --------- | --------- | ---------------- |
 | `level`       | `string` | log level</br>Valid values: `'trace'`, `'debug'`, `'info'`, `'warn'`, `'error'`, `'fatal'`</br>Level order: `'trace'` < `'debug'` < `'info'` < `'warn'` < `'error'` < `'fatal'`    | `'info'`      |
-| `timestamp`   | `boolean` | If true, the timestamp is output. | `true` |
-| `levelName`   | `boolean` | If true, the log level name (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`) is output. | `true` |
+| `timestamp`   | `boolean` | If set to `true`, the timestamp is output. | `true` |
+| `levelName`   | `boolean` | If set to `true`, the log level name (TRACE, DEBUG, INFO, WARN, ERROR, FATAL) is output. | `true` |
+| `callStack`   | `boolean` | If set to `true`, the call stack is added to `trace`-level logs. | `false` |
+| `stackTraceLimit` | `number` | Specifies the number of stack frames collected by a stack trace. | `10` |
 | `breakLength` | `number`  | The length at which input values are split across multiple lines.</br>Set to Infinity to format the input as a single line </br>(in combination with compact set to true or any number >= 1). | `120` |
-| `colors`      | `boolean` | If true, the output is styled with ANSI color codes. </br>Colors are customizable. See [Customizing util.inspect colors](https://nodejs.org/api/util.html#customizing-utilinspect-colors).  | `true` |
+| `colors`      | `boolean` | If set to `true`, the output is styled with ANSI color codes. </br>Colors are customizable. See [Customizing util.inspect colors](https://nodejs.org/api/util.html#customizing-utilinspect-colors).  | `true` |
 | `compact`     | `boolean` or `number` | Setting this to false causes each object key to be displayed on a new line. </br>It will break on new lines in text that is longer than breakLength. </br>If set to a number, the most n inner elements are united on a single line </br>as long as all properties fit into breakLength. </br>Short array elements are also grouped together.   | `false` |
 | `depth` | `number` or `null` | Specifies the maximum recursion depth for nested objects. </br>Use null to inspect all levels recursively.  | `null` |
 | `maxArrayLength` | `number` or `null` | Specifies the maximum number of Array, TypedArray, Map, WeakMap, and WeakSet </br>elements to include when formatting. Set to null or Infinity to show all elements. </br>Set to 0 or negative to show no elements.  | `100` |
