@@ -1,0 +1,32 @@
+{
+  "name": "@ayapapa-npm/pretty-console",
+  "version": "0.1.0",
+  "description": "A tiny wrapper around the standard Node.js `console`.",
+  "license": "MIT",
+  "author": "ayapapa",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.js --format esm,cjs --out-dir dist --clean --dts",
+    "test": "vitest run",
+    "test:debug": "vitest --inspect-brk --run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
+  },
+
+  "dependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}
