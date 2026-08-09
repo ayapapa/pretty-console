@@ -39,7 +39,7 @@ For more information, see the description of
 | `level`       | `string` | The minimum log level to display. Valid values: `'trace'`, `'debug'`, `'info'`, `'warn'`, `'error'`, `'fatal'`. Order: `'trace'` < `'debug'` < `'info'` < `'warn'` < `'error'` < `'fatal'` | `'info'`      |
 | `timestamp`   | `boolean` | If `true`, includes a timestamp in the output. | `true` |
 | `levelName`   | `boolean` | If `true`, includes the log level name (e.g., TRACE, DEBUG). | `true` |
-| `callStack`   | `boolean` | If `true`, includes the call stack for trace-level logs. | `false` |
+| `callStack`   | `boolean` | If `true`, includes the call stack for `trace`-level logs. | `false` |
 | `stackTraceLimit` | `number` | Specifies the number of stack frames to output in the stack trace. If a non-numeric value or a negative number is specified, the stack trace will not output any frames. | `10` |
 | `breakLength` | `number`  | The length at which input values are split across multiple lines. Set to Infinity to format the input as a single line (in combination with compact set to true or any number >= 1). | `120` |
 | `colors`      | `boolean` | If `true`, the output is styled with ANSI color codes. Colors are customizable. See [Customizing util.inspect colors](https://nodejs.org/api/util.html#customizing-utilinspect-colors). | `true` |
@@ -49,3 +49,39 @@ For more information, see the description of
 | `maxStringLength` | `number` or `null` | Sets the maximum number of characters to include when formatting. Use `null` or `Infinity` to show all characters. Use `0` or a negative number to show no characters. | `12800` |
 | `sorted`      | `boolean` or `function` | If `true` or a function, all properties of an object, and Set and Map entries are sorted in the resulting string. If `true`, the [default sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) is used. If a function is provided, it is used as a [compare function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#parameters). | `true` |
 
+## Usage
+
+```javascript
+import { PrettyConsole } from '@ayapapa-npm/pretty-console-js';
+
+// Create instance
+const logger = new PrettyConsole({ level: 'trace', callStack: true });
+
+function someFunc(x, y, z) {
+  logger.trace('enter someFunc', 'args: ', 'x =', x, 'y =', y, 'z =', z);
+
+  const obj = { jjj: true, iii: 123, hhh: 'hello', next: { ggg: "goodbye", ddd: "yesterday", yyy: 1998.092 } };
+  logger.info(obj);
+
+  const result = x * y - z;
+  logger.debug("result =", result);
+
+  try {
+    throw new Error("Error!!");
+  }
+  catch (err) {
+    logger.error("Error occuered.", err);
+  }
+
+  return result;
+}
+
+function main() {
+  const res = someFunc(1, 2, 3);
+  logger.log("someFunc() returns:", res);
+}
+
+main();
+```
+Execution results:<br>
+![Execution results](./images/usage1.png)

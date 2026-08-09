@@ -158,32 +158,39 @@ export class PrettyConsole {
   };
   
   /** current configuration */
-  private static config = PrettyConsole.defaultConf;
+  private config = { ...PrettyConsole.defaultConf };
 
   /**
    * Public methods
    */
 
   /**
+   * @param config
+   */
+  constructor(config: Config = PrettyConsole.defaultConf) {
+    this.setConfig(config);
+  }
+
+  /**
    * Set configuration.
    * @param config  configuration
    */
-  public static setConfig(config: Config): void {
-    PrettyConsole.config = PrettyConsole.resolvedConfig(config);
+  public setConfig(config: Config): void {
+    this.config = this.resolvedConfig(config);
   }
 
   /**
    * Get current configuration.
    */
-  public static getConfig(): Config {
-    return {...PrettyConsole.config};
+  public getConfig(): Config {
+    return {...this.config};
   }
 
   /**
    * Reset current configuration
    */
-  public static resetConfig(): void {
-    PrettyConsole.config = {...PrettyConsole.defaultConf};
+  public resetConfig(): void {
+    this.config = {...PrettyConsole.defaultConf};
   }
 
   /**
@@ -193,18 +200,19 @@ export class PrettyConsole {
     return {...PrettyConsole.defaultConf};
   }
 
-  private static getLogger() {
-    if (PrettyConsole.config.provider) return PrettyConsole.config.provider;
-    return console;
-    //return !PrettyConsole.config.provider ? PrettyConsole.config.provider : console;
+  /**
+   * Get detfault configuration.
+   */
+  public getDefaultConfig(): Config {
+    return PrettyConsole.getDefaultConfig();
   }
 
   /**
    * Always output information, regardless of the log level.
    * @param args  An array of values ​​to be output.
    */
-  public static log(...args: any[]) {
-    PrettyConsole.output(null, args, PrettyConsole.getLogger().log);
+  public log(...args: any[]) {
+    this.output(null, args, this.getLogger().log);
   }
 
   /**
@@ -212,51 +220,51 @@ export class PrettyConsole {
    * If 'callStack' is true, the call stack is also output.
    * @param args  An array of values ​​to be output.
    */
-  public static trace(...args: any[]) {
-    if (PrettyConsole.config.callStack) {
-      args.push('\n' + PrettyConsole.getCallStack());
+  public trace(...args: any[]) {
+    if (this.config.callStack) {
+      args.push('\n' + this.getCallStack());
     }
-    PrettyConsole.output('trace', args, PrettyConsole.getLogger().debug);
+    this.output('trace', args, this.getLogger().debug);
   }
 
   /**
    * Output information at the 'debug' level.
    * @param args  An array of values ​​to be output.
    */
-  public static debug(...args: any[]) {
-    PrettyConsole.output('debug', args, PrettyConsole.getLogger().debug);
+  public debug(...args: any[]) {
+    this.output('debug', args, this.getLogger().debug);
   }
 
   /**
    * Output information at the 'info' level.
    * @param args  An array of values ​​to be output.
    */
-  public static info(...args: any[]) {
-    PrettyConsole.output('info', args, PrettyConsole.getLogger().info);
+  public info(...args: any[]) {
+    this.output('info', args, this.getLogger().info);
   }
 
   /**
    * Output information at the 'warn' level.
    * @param args  An array of values ​​to be output.
    */
-  public static warn(...args: any[]) {
-    PrettyConsole.output('warn', args, PrettyConsole.getLogger().warn);
+  public warn(...args: any[]) {
+    this.output('warn', args, this.getLogger().warn);
   }
 
   /**
    * Output information at the 'error' level.
    * @param args  An array of values ​​to be output.
    */
-  public static error(...args: any[]) {
-    PrettyConsole.output('error', args, PrettyConsole.getLogger().error);
+  public error(...args: any[]) {
+    this.output('error', args, this.getLogger().error);
   }
 
   /**
    * Output information at the 'fatal' level.
    * @param args  An array of values ​​to be output.
    */
-  public static fatal(...args: any[]) {
-    PrettyConsole.output('fatal', args, PrettyConsole.getLogger().error);
+  public fatal(...args: any[]) {
+    this.output('fatal', args, this.getLogger().error);
   }
 
   /**
@@ -267,8 +275,8 @@ export class PrettyConsole {
    * Check whether to output logs.
    * @param level Log level
    */
-  private static shouldLog(level: LogLevel | null): boolean {
-    return !level || logLevels[level] >= logLevels[PrettyConsole.config.level];
+  private shouldLog(level: LogLevel | null): boolean {
+    return !level || logLevels[level] >= logLevels[this.config.level];
   }
 
   /**
@@ -276,7 +284,7 @@ export class PrettyConsole {
    * @param config  
    * @returns Resolved configuration
   */
-  private static resolvedConfig(config: Config): Config {
+  private resolvedConfig(config: Config): Config {
     const rConf = {...config};
     const checkType = <K extends keyof Config>(key: K , typeChecker: (v: Config[K]) => boolean) => {
       if (Object.hasOwn(config, key)) {
@@ -287,7 +295,6 @@ export class PrettyConsole {
     }
 
     // check type
-    const ttttt = typeof config.level;
     checkType('level',          (v) => typeof v === 'string' && Object.hasOwn(logLevels, v));
     checkType('timestamp',      (v) => typeof v === 'boolean');
     checkType('levelName',      (v) => typeof v === 'boolean');
@@ -310,13 +317,13 @@ export class PrettyConsole {
    * @param args  An array of values ​​to be output.
    * @returns An array of formatted values ​​to be output.
    */
-  private static format(args: any[]): any[] {
+  private format(args: any[]): any[] {
     return args.map((value: any) => {
       if (value instanceof Error) {
         return value;
       }
       if (typeof value === "object" && value !== null) {
-        return util.inspect(value, PrettyConsole.config);
+        return util.inspect(value, this.config);
       }
       return value;
     });
@@ -335,7 +342,7 @@ export class PrettyConsole {
    *  - SSS: Millisecond (3 digits)
    * @returns {string}
    */
-  private static formatDate(date: Date | number, format: string = "YYYY-MM-DD HH:mm:ss.SSS") {
+  private formatDate(date: Date | number, format: string = "YYYY-MM-DD HH:mm:ss.SSS") {
     format = format || "YYYY-MM-DD HH:mm:ss.SSS";
     date = new Date(date);
     const year = date.getFullYear();
@@ -365,9 +372,9 @@ export class PrettyConsole {
    * @param level Log level
    * @returns An array of output values ​​with a prefix added.
    */
-  private static addPrefixes(args: any[], level: LogLevel | null): any[] {
-    if (level && PrettyConsole.config.levelName) args.unshift(`${level.toUpperCase()}:`);
-    if (PrettyConsole.config.timestamp) args.unshift(`[${PrettyConsole.formatDate(Date.now())}]`);
+  private addPrefixes(args: any[], level: LogLevel | null): any[] {
+    if (level && this.config.levelName) args.unshift(`${level.toUpperCase()}:`);
+    if (this.config.timestamp) args.unshift(`[${this.formatDate(Date.now())}]`);
     return args;
   }
 
@@ -377,22 +384,29 @@ export class PrettyConsole {
    * @param args  An array of values ​​to be output.
    * @param logFn Function to output the log.
    */
-  private static output(level: LogLevel | null, args: any[], logFn: (...a: any[]) => void): void {
-    if (PrettyConsole.shouldLog(level)) {
-      logFn(...PrettyConsole.format(PrettyConsole.addPrefixes(args, level)));
+  private output(level: LogLevel | null, args: any[], logFn: (...a: any[]) => void): void {
+    if (this.shouldLog(level)) {
+      logFn(...this.format(this.addPrefixes(args, level)));
     }
   }
 
   /**
    * Get the call stack.
    */
-  private static getCallStack(): string {
+  private getCallStack(): string {
     const prev = Error.stackTraceLimit;
-    Error.stackTraceLimit = PrettyConsole.config.stackTraceLimit;
+    Error.stackTraceLimit = this.config.stackTraceLimit;
     const err = new Error('');
     Error.stackTraceLimit = prev;  
     err.stack = err.stack ? err.stack.replace('Error', 'Call stack') : `Call stack: couldn't get`;
     return err.stack;  
+  }
+
+  /**
+   * get logger obect
+   */
+  private getLogger(): LogProvider {
+    return this.config.provider ? this.config.provider : console;
   }
 
 }
