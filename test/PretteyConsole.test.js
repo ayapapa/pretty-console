@@ -1,8 +1,14 @@
 	import { describe, expect, it, vi } from 'vitest';
-	import { PrettyConsole } from '../src/lib/PrettyConsole.js';
+	import { PrettyConsole, LogLevel } from '../src/lib/PrettyConsole.ts';
 
 	describe('PrettyConsole', () => {
 
+    const equalConfigs = (c1, c2) => {
+      for (const key in c1) {
+        if (c1[key] !==  c2[key]) return false;
+      }
+      return true;
+    }
     const checkDefaultCong = (config) => {
 	  	const defConf = config ?? PrettyConsole.getDefaultConfig();
 	    expect(defConf.level).toBe('info');
@@ -62,17 +68,127 @@
 	  });
 
     it('if reset current configurations, they become default set', () => {
-	  	const conf = PrettyConsole.resetConfig();
+	  	PrettyConsole.resetConfig();
       checkDefaultCong(PrettyConsole.getConfig());
 	  });
 
-/*
     it('current configurations are invariant', () => {
 	  	let conf = PrettyConsole.getConfig();
       Object.assign(conf, testConf);
-      checkDefaultCong();
+      expect(equalConfigs(testConf, PrettyConsole.getConfig())).toBe(false);
 	  });
-*/
+
+    const provider = {
+      log: vi.fn(),
+      trace: vi.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+
+    const testOutputContents = (provider, level, realKey, msg, addConf = {}) => {
+      PrettyConsole.setConfig({level: level, provider: provider, ...addConf});
+      PrettyConsole[level](msg);
+      const args = provider[realKey].mock.calls[0];
+      expect(args[1]).toContain(level.toUpperCase()+':');
+      expect(args[2]).toContain(msg);
+      if (addConf && addConf.callStack) {
+        expect(args[3]).toContain('Call stack:');
+      }
+    };
+
+    it('Output a trace log.', () => {
+      testOutputContents(provider, 'trace', 'debug',  'trace test', {callStack: true});
+    });
+
+    it('Output a debug log.', () => {
+      // Since `trace` shares the same definition as `debug`, `debug` is being redefined.
+      const provider = {
+        debug: vi.fn(),
+      }
+      testOutputContents(provider, 'debug', 'debug', 'debug test');
+    });
+
+    it('Output a info log.', () => {
+      testOutputContents(provider, 'info', 'info', 'info test');
+    });
+
+    it('Output a warn log.', () => {
+      testOutputContents(provider, 'warn', 'warn', 'warn test');
+    });
+
+    it('Output a error log.', () => {
+      testOutputContents(provider, 'error', 'error', 'error test');
+    });
+
+    it('Output a fatal error log.', () => {
+      // Since `fatal` shares the same definition as `error`, `error` is being redefined.
+      const provider = {
+        error: vi.fn(),
+      }
+      testOutputContents(provider, 'fatal', 'error', 'fatal test');
+    });
+
+    PrettyConsole.resetConfig();
+
+    const checkInvalidProperty = (key, values) => {
+      values.forEach((v) => {
+        const config = {};
+        config[key] = v;
+        expect(() => PrettyConsole.setConfig(config)).toThrow(Error);
+        expect(() => PrettyConsole.setConfig(config)).toThrow(`Type mismatch for config.${key}`);
+      });
+    };
+
+    it('invalid level', () => {
+      checkInvalidProperty('level', [undefined, null, 'hoge',  {no: true}, new Error()]);
+    });
+
+    it('invalid timestamp', () => {
+      checkInvalidProperty('timestamp', [undefined, null, 'hoge', 0, {yes: true}, new Error()]);
+    });
+
+    it('invalid levelName', () => {
+      checkInvalidProperty('levelName', [undefined, null, 'hoge', 0, {yes: 'no'}, new Error()]);
+    });
+
+    it('invalid callStack', () => {
+      checkInvalidProperty('callStack', [undefined, null, 'hoge', 0, {yes: 'no'}, new Error()]);
+    });
+
+    it('invalid stackTraceLimit', () => {
+      checkInvalidProperty('stackTraceLimit', [undefined, null, 'hoge', true, {yes: 'no'}, new Error()]);
+    });
+    
+    it('invalid breakLength', () => {
+      checkInvalidProperty('breakLength', [undefined, null, 'hoge', true, {yes: 'no'}, new Error()]);
+    });
+
+    it('invalid colors', () => {
+      checkInvalidProperty('colors', [undefined, null, 'hoge', {yes: 'no'}, 0, new Error()]);
+    });
+
+    it('invalid compact', () => {
+      checkInvalidProperty('compact', [undefined, null, 'hoge', {yes: 'no'}, new Error()]);
+    });
+
+    it('invalid depth', () => {
+      checkInvalidProperty('depth', [undefined, 'hoge', false, {yes: 'no'}, new Error()]);
+    });
+
+    it('invalid maxArrayLength', () => {
+      checkInvalidProperty('maxArrayLength', [undefined, 'hoge', false, {yes: 'no'}, new Error()]);
+    });
+
+    it('invalid maxStringLength', () => {
+      checkInvalidProperty('maxStringLength', [undefined, 'hoge', false, {yes: 'no'}, new Error()]);
+    });
+
+    it('invalid sorted', () => {
+      checkInvalidProperty('sorted', [undefined, null, 'hoge', {yes: 'no'}, 0, new Error()]);
+    });
+    
   });
 
   

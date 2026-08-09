@@ -17,16 +17,19 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.js --format esm,cjs --out-dir dist --clean --dts",
+    "build": "tsup src/index.ts --format esm,cjs --out-dir dist --clean --dts",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:debug": "vitest --inspect-brk --run",
     "test:watch": "vitest",
-    "prepublishOnly": "npm run build && npm test"
+    "check": "npm run typecheck && npm run build && npm run test",
+    "release:check": "npm run typecheck && npm run build && npm run test",
+    "prepublishOnly": "npm run release:check"
   },
-
-  "dependencies": {
+  "devDependencies": {
+    "@types/node": "^26.2.0",
     "tsup": "^8.5.1",
-    "typescript": "^7.0.2",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   }
 }
