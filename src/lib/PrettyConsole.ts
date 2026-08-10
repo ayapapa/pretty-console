@@ -137,10 +137,10 @@ export interface Config {
 export class PrettyConsole {
 
   /** 
-   * Ppraivate fields
+   * Private fields
    */
 
-  /** default configuration */
+  /** Default configuration */
   private static readonly defaultConf: Config  = {
     level:            'info',
     timestamp:        true,
@@ -157,7 +157,7 @@ export class PrettyConsole {
     sorted:           true,
   };
   
-  /** current configuration */
+  /** Current configuration */
   private config = { ...PrettyConsole.defaultConf };
 
   /**
@@ -294,7 +294,7 @@ export class PrettyConsole {
       }
     }
 
-    // check type
+    // Check type
     checkType('level',          (v) => typeof v === 'string' && Object.hasOwn(logLevels, v));
     checkType('timestamp',      (v) => typeof v === 'boolean');
     checkType('levelName',      (v) => typeof v === 'boolean');
@@ -308,7 +308,7 @@ export class PrettyConsole {
     checkType('maxStringLength',(v) => typeof v === 'number' || v === null);
     checkType('sorted',         (v) => typeof v === 'boolean' || typeof v === 'function');
 
-    // fill options with default values, and return.
+    // Fill options with default values, and return.
     return {...PrettyConsole.defaultConf, ...rConf};
   }
 
@@ -379,7 +379,7 @@ export class PrettyConsole {
   }
 
   /**
-   * output log
+   * Output log
    * @param level Log level
    * @param args  An array of values ​​to be output.
    * @param logFn Function to output the log.
@@ -403,7 +403,7 @@ export class PrettyConsole {
   }
 
   /**
-   * get logger obect
+   * Get logger obect
    */
   private getLogger(): LogProvider {
     return this.config.provider ? this.config.provider : console;
