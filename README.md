@@ -23,7 +23,7 @@ It keeps the familiar `console` API while adding a few small conveniences for ev
 The goal is **not** to replace logging frameworks such as [Pino](https://www.npmjs.com/package/pino) or [Winston](https://www.npmjs.com/package/winston), but to make the built-in `console` more pleasant to use during development.
 
 ## Installation
-pretty-console-js
+
 ```bash
 npm install @ayapapa-npm/pretty-console-js
 ```
