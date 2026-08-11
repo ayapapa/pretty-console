@@ -1,4 +1,5 @@
 import util from 'node:util';
+import { DateFormatter } from '@ayapapa-npm/date-formatter-js';
 
 /** Log levels */
 const logLevels = {
@@ -166,6 +167,7 @@ export class PrettyConsole {
 
   /**
    * @param config
+   * @default `PrettyConsole.defaultConf`
    */
   constructor(config: Config = PrettyConsole.defaultConf) {
     this.setConfig(config);
@@ -181,6 +183,7 @@ export class PrettyConsole {
 
   /**
    * Get current configuration.
+   * @returns Current configuration.
    */
   public getConfig(): Config {
     return {...this.config};
@@ -194,14 +197,16 @@ export class PrettyConsole {
   }
 
   /**
-   * Get detfault configuration.
+   * Get default configuration.
+   * @returns Default configuration.
    */
   public static getDefaultConfig(): Config {
     return {...PrettyConsole.defaultConf};
   }
 
   /**
-   * Get detfault configuration.
+   * Get default configuration.
+   * @returns Default configuration.
    */
   public getDefaultConfig(): Config {
     return PrettyConsole.getDefaultConfig();
@@ -222,7 +227,12 @@ export class PrettyConsole {
    */
   public trace(...args: any[]) {
     if (this.config.callStack) {
-      args.push('\n' + this.getCallStack());
+      const prev = Error.stackTraceLimit;
+      Error.stackTraceLimit = this.config.stackTraceLimit;
+      const err = new Error(' ');
+      Error.stackTraceLimit = prev;  
+      err.stack = err.stack ? err.stack.replace('Error', 'Call stack') : `Call stack: couldn't get`;
+      args.push('\n' + err.stack);
     }
     this.output('trace', args, this.getLogger().debug);
   }
@@ -274,6 +284,7 @@ export class PrettyConsole {
   /**
    * Check whether to output logs.
    * @param level Log level
+   * @returns true if `level` is `null` or `level` >= `level of the current setting`, and false otherwise.
    */
   private shouldLog(level: LogLevel | null): boolean {
     return !level || logLevels[level] >= logLevels[this.config.level];
@@ -314,6 +325,8 @@ export class PrettyConsole {
 
   /**
    * Format the values ​​in the array.
+   * 
+   * @internal
    * @param args  An array of values ​​to be output.
    * @returns An array of formatted values ​​to be output.
    */
@@ -331,43 +344,19 @@ export class PrettyConsole {
 
   /**
    * Format a Date instance or UTC time (in milliseconds). 
+   * 
+   * @internal
    * @param date    `Date` instance or UTC time (in milliseconds)
-   * @param format  Time string formatting pattern. Example: "YYYY-MM-DD HH:mm:ss.SSS"
-   *  - YYYY: Year (4 digits)
-   *  - MM: Month (2 digits)
-   *  - DD: Day (2 digits)
-   *  - HH: Hour (2 digits, 24-hour format)
-   *  - mm: Minute (2 digits)
-   *  - ss: Second (2 digits)
-   *  - SSS: Millisecond (3 digits)
-   * @returns {string}
+   * @returns A formatted datetime string.
    */
-  private formatDate(date: Date | number, format: string = "YYYY-MM-DD HH:mm:ss.SSS") {
-    format = format || "YYYY-MM-DD HH:mm:ss.SSS";
-    date = new Date(date);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1; // 0-11 → 1-12
-    const day = date.getDate();
-    const hour = date.getHours();
-    const minute = date.getMinutes();
-    const second = date.getSeconds();
-    const ms = date.getMilliseconds();
-
-    const pad2 = (n: number) => String(n).padStart(2, "0");
-    const pad3 = (n: number) => String(n).padStart(3, "0");
-
-    return format
-      .replace(/YYYY/g, String(year))
-      .replace(/MM/g, pad2(month))
-      .replace(/DD/g, pad2(day))
-      .replace(/HH/g, pad2(hour))
-      .replace(/mm/g, pad2(minute))
-      .replace(/ss/g, pad2(second))
-      .replace(/SSS/g, pad3(ms));
+  private formatDate(date: Date | number) {
+    return DateFormatter.format(new Date(date), "yyyy-MM-dd HH:mm:ss.fff");
   }
 
   /**
    * Add a prefix to the array of output values.
+   * 
+   * @internal
    * @param args  An array of values ​​to be output.
    * @param level Log level
    * @returns An array of output values ​​with a prefix added.
@@ -380,6 +369,8 @@ export class PrettyConsole {
 
   /**
    * Output log
+   * 
+   * @internal
    * @param level Log level
    * @param args  An array of values ​​to be output.
    * @param logFn Function to output the log.
@@ -391,19 +382,9 @@ export class PrettyConsole {
   }
 
   /**
-   * Get the call stack.
-   */
-  private getCallStack(): string {
-    const prev = Error.stackTraceLimit;
-    Error.stackTraceLimit = this.config.stackTraceLimit;
-    const err = new Error('');
-    Error.stackTraceLimit = prev;  
-    err.stack = err.stack ? err.stack.replace('Error', 'Call stack') : `Call stack: couldn't get`;
-    return err.stack;  
-  }
-
-  /**
    * Get logger obect
+   * 
+   * @internal
    */
   private getLogger(): LogProvider {
     return this.config.provider ? this.config.provider : console;
