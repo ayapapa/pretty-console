@@ -1,5 +1,6 @@
 	import { describe, expect, it, vi, type Mock } from 'vitest';
-	import { PrettyConsole, type LogLevel, type Config, type ConfigKey  } from '../src/lib/PrettyConsole.ts';
+	//import { PrettyConsole, type LogLevel, type Config, type ConfigKey, type CompareFn } from '../src/lib/PrettyConsole.ts';
+	import { PrettyConsole, type LogLevel, type Config, type ConfigKey, type CompareFn } from '../src/index';
 
   type ProviderKey = 'log' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
   type Provider = Record<ProviderKey, Mock>;

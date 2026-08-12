@@ -1,6 +1,6 @@
 {
   "name": "@ayapapa-npm/pretty-console-js",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A tiny wrapper around the standard Node.js `console`.",
   "license": "MIT",
   "author": "ayapapa",
