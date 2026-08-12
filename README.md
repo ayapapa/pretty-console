@@ -90,4 +90,4 @@ function main() {
 main();
 ```
 Execution results:<br>
-![Execution results](./images/usage1.png)
+![Execution results](https://raw.githubusercontent.com/ayapapa/pretty-console-js/main/images/usage1.png)
