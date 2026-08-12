@@ -29,77 +29,105 @@ export type LogProvider = Pick<Console,  'log' | 'error' | 'warn' | 'info' | 'de
  * {@link https://nodejs.org/api/util.html#utilinspectobject-options util.inspect() Configuration Options}.
  */
 export interface Config {
-  /** log level
-   *  Valid values: 'trace', 'debug', 'info', 'warn', 'error', 'fatal'
-   *  Level order: 'trace' < 'debug' < 'info' < 'warn' < 'error' < 'fatal'
-   *  - 'trace':  Output logs for all levels
-   *  - 'debug':  Output logs for 'debug' and higher levels
-   *  - 'info':   Output logs for 'info' and higher levels (default)
-   *  - 'warn':   Output logs for 'warn' and higher levels
-   *  - 'error':  Output logs for 'error' and 'fatal' levels
-   *  - 'fatal':  Output logs only for the 'fatal' level
+  /**
+   * Desired logging level. 
+   * In order of priority, available levels are:
+   *  - 'trace':  Output logs for all levels.
+   *  - 'debug':  Output logs for 'debug' and higher levels.
+   *  - 'info':   Output logs for 'info' and higher levels.
+   *  - 'warn':   Output logs for 'warn' and higher levels.
+   *  - 'error':  Output logs for 'error' and 'fatal' levels.
+   *  - 'fatal':  Output logs only for the 'fatal' level.
+   * If omitted, defaults to `'info'`.
    */
-  level: LogLevel;
-
-  /** If set to `true`, the timestamp is output. */
-  timestamp: boolean;
-
-  /** If set to `true`, the log level name 
-   * (TRACE, DEBUG, INFO, WARN, ERROR, FATAL) is output. */
-  levelName: boolean
-
-  /** If set to `true`, the call stack is added to `trace`-level logs. */
-  callStack: boolean;
-
-  /** Specifies the number of stack frames collected by a stack trace. */
-  stackTraceLimit: number;
-
-  /** A substitute for the console */
-  provider : LogProvider;
+  level?: LogLevel;
 
   /**
-   * The length at which input values are split across multiple lines.
+   * Whether to output timestamps. 
+   * If set to `true`, the timestamp is output.
+   * If omitted, defaults to `true`.
+   */
+  timestamp?: boolean;
+
+  /**
+   * Whether to output logging level name. 
+   * If set to `true`, the log level name 
+   * (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`) is output.
+   * If omitted, defaults to `true`.
+   */
+  levelName?: boolean
+
+  /**
+   * Whether to output the call stack in `trace()`. 
+   * If set to `true`, the call stack is added to `trace`-level logs. 
+   * If omitted, defaults to `false`.
+   */
+  callStack?: boolean;
+
+  /**
+   * Upper limit on the number of stack frames. 
+   * Specifies the number of stack frames collected by a stack trace.
+   * If omitted, defaults to `10`.
+   */
+  stackTraceLimit?: number;
+
+  /**
+   * Alternative to `console`.
+   * If omitted, `console` is used.
+   */
+  provider? : LogProvider;
+
+  /**
+   * Specifies the length at which input values are split across multiple lines.
    * Set to Infinity to format the input as a single line
    * (in combination with compact set to true or any number >= 1).
+   * If omitted, default to `120`.
    */
-  breakLength: number;
+  breakLength?: number;
 
   /**
+   * Whether to color the output. 
    * If set to `true`, the output is styled with ANSI color codes.
    * Colors are customizable. See {@link https://nodejs.org/api/util.html#customizing-utilinspect-colors Customizing util.inspect colors}. 
+   * If omitted, default to `true`.
    */
-  colors: boolean;
+  colors?: boolean;
 
   /**
+   * Whether to make the object output compact.
    * Setting this to false causes each object key to be displayed on a new line.
-   *  It will break on new lines in text that is longer than breakLength.
-   *  If set to a number, the most n inner elements are united on a single line
-   *  as long as all properties fit into breakLength.
-   *  Short array elements are also grouped together.
+   * It will break on new lines in text that is longer than breakLength.
+   * If set to a number, the most n inner elements are united on a single line
+   * as long as all properties fit into breakLength.
+   * Short array elements are also grouped together.
+   * If omitted, default to `false`.
    */
-  compact: boolean | number;
+  compact?: boolean | number;
 
   /**
    * Specifies the maximum recursion depth for nested objects.
    * Use null to inspect all levels recursively.
+   * If omitted, default to `null`.
    */
-  depth: number | null;
+  depth?: number | null;
 
   /**
    * Specifies the maximum number of Array, TypedArray, Map, WeakMap, and WeakSet
-   *  elements to include when formatting. Set to null or Infinity to show all elements.
-   *  Set to 0 or negative to show no elements. 
-   *  For more information, see the description of
-   *  {@link https://nodejs.org/api/util.html#utilinspectobject-options util.inspect() Configuration Options}.
+   * elements to include when formatting. Set to null or Infinity to show all elements.
+   * Set to 0 or negative to show no elements. 
+   * For more information, see the description of
+   * {@link https://nodejs.org/api/util.html#utilinspectobject-options util.inspect() Configuration Options}.
+   * If omitted, default to `100`.
    */
-  maxArrayLength: number | null;
+  maxArrayLength?: number | null;
 
   /**
    * Specifies the maximum number of characters to include when formatting.
    * Set to null or Infinity to show all elements.
    * Set to 0 or negative to show no characters.
+   * If omitted, default to `12800`.
    */
-  maxStringLength: number | null;
+  maxStringLength?: number | null;
 
   /**
    * If set to `true` or a `function`, all properties of an object,
@@ -107,9 +135,12 @@ export interface Config {
    * If set to `true`, the {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort default sort}
    * is used. If set to a function, it is used as a
    * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#parameters compare function}.
+   * If omitted, default to `true`.
    */
-  sorted: boolean | CompareFn;
+  sorted?: boolean | CompareFn;
 };
+
+export type ConfigKey = keyof Config;
 
 /**
  * PrettyConsole, that is a tiny wrapper around the standard Node.js console.
@@ -140,14 +171,19 @@ export class PrettyConsole {
   /** 
    * Private fields
    */
+  /** Default logging leve */
+  private static readonly defaultLevel: LogLevel = 'info';
+
+  /** Default stackTraceLimit */
+  private static readonly defaultStackTraceLimit: number = 10;
 
   /** Default configuration */
   private static readonly defaultConf: Config  = {
-    level:            'info',
+    level:            PrettyConsole.defaultLevel,
     timestamp:        true,
     levelName:        true,
     callStack:        false,
-    stackTraceLimit:  10,
+    stackTraceLimit:  PrettyConsole.defaultStackTraceLimit,
     provider:         console,
     breakLength:      120,
     colors:           true,
@@ -159,7 +195,7 @@ export class PrettyConsole {
   };
   
   /** Current configuration */
-  private config = { ...PrettyConsole.defaultConf };
+  private config: Config = { ...PrettyConsole.defaultConf };
 
   /**
    * Public methods
@@ -228,7 +264,7 @@ export class PrettyConsole {
   public trace(...args: any[]) {
     if (this.config.callStack) {
       const prev = Error.stackTraceLimit;
-      Error.stackTraceLimit = this.config.stackTraceLimit;
+      Error.stackTraceLimit = this.config.stackTraceLimit ?? PrettyConsole.defaultStackTraceLimit;
       const err = new Error(' ');
       Error.stackTraceLimit = prev;  
       err.stack = err.stack ? err.stack.replace('Error', 'Call stack') : `Call stack: couldn't get`;
@@ -287,11 +323,13 @@ export class PrettyConsole {
    * @returns true if `level` is `null` or `level` >= `level of the current setting`, and false otherwise.
    */
   private shouldLog(level: LogLevel | null): boolean {
-    return !level || logLevels[level] >= logLevels[this.config.level];
+    return !level || logLevels[level] >= logLevels[this.config.level ?? PrettyConsole.defaultLevel];
   }
 
   /**
    * Validate the configuration settings and assign default values ​​to any unspecified settings.
+   *
+   * @internal
    * @param config  
    * @returns Resolved configuration
   */
@@ -300,7 +338,7 @@ export class PrettyConsole {
     const checkType = <K extends keyof Config>(key: K , typeChecker: (v: Config[K]) => boolean) => {
       if (Object.hasOwn(config, key)) {
         if (!typeChecker(config[key])) {
-          throw new Error(`Type mismatch for config.${key}.`);
+          throw new TypeError(`Type mismatch for config.${key}.`);
         }
       }
     }

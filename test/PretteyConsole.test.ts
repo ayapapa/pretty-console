@@ -1,15 +1,25 @@
-	import { describe, expect, it, vi } from 'vitest';
-	import { PrettyConsole, LogLevel } from '../src/lib/PrettyConsole.ts';
+	import { describe, expect, it, vi, type Mock } from 'vitest';
+	import { PrettyConsole, type LogLevel, type Config, type ConfigKey  } from '../src/lib/PrettyConsole.ts';
 
-	describe('PrettyConsole', () => {
+  type ProviderKey = 'log' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  type Provider = Record<ProviderKey, Mock>;
+	
+  describe('PrettyConsole', () => {
 
-    const equalConfigs = (c1, c2) => {
-      for (const key in c1) {
-        if (c1[key] !==  c2[key]) return false;
+    const equalConfigs = (c1: Config, c2: Config): boolean => {
+      const keys1 = Object.keys(c1) as Array<ConfigKey>;
+      const keys2 = Object.keys(c2) as Array<ConfigKey>;
+
+      if (keys1.length !== keys2.length) return false;
+
+      for (const key of keys1) {
+        if (c1[key] !== c2[key]) return false;
       }
+
       return true;
-    }
-    const checkDefaultCong = (config) => {
+    };
+
+    const checkDefaultCong = (config?: Config) => {
 	  	const defConf = config ?? PrettyConsole.getDefaultConfig();
 	    expect(defConf.level).toBe('info');
 	    expect(defConf.timestamp).toBe(true);
@@ -29,7 +39,7 @@
       checkDefaultCong();
 	  });
 
-    const testConf = {
+    const testConf: Config = {
       level: 'trace',
       timestamp: false,
       levelName: false,
@@ -80,73 +90,72 @@
       expect(equalConfigs(logger.getDefaultConfig(), logger.getConfig())).toBe(true);
 	  });
 
-    const provider = {
+    const levelToProviderKey: Record<LogLevel, ProviderKey> = {
+      trace: 'debug',
+      debug: 'debug',
+      info: 'info',
+      warn: 'warn',
+      error: 'error',
+      fatal: 'error',
+    };
+  
+    const createProvider = (): Provider => ({
       log: vi.fn(),
-      trace: vi.fn(),
       debug: vi.fn(),
       info: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),
-    };
-
-    const testOutputContents = (provider, level, realKey, msg, addConf = {}) => {
-      const logger = new PrettyConsole({level: level, provider: provider, ...addConf});
+      fatal: vi.fn(),
+    })
+  
+    const testOutputContents = (
+      level: LogLevel,
+      msg: string,
+      addConf: { callStack?: boolean } = {},
+    ): void => {
+      const provider: Provider = createProvider();
+      const logger = new PrettyConsole({ level, provider, ...addConf });
       logger[level](msg);
+
+      const realKey = levelToProviderKey[level];
       const args = provider[realKey].mock.calls[0];
-      expect(args[1]).toContain(level.toUpperCase()+':');
+
+      expect(args[1]).toContain(level.toUpperCase() + ':');
       expect(args[2]).toContain(msg);
-      if (addConf && addConf.callStack) {
+
+      if (addConf?.callStack) {
         expect(args[3]).toContain('Call stack:');
       }
     };
 
     it('Output a trace log.', () => {
-      const provider = {
-        debug: vi.fn(),
-      };
-      testOutputContents(provider, 'trace', 'debug',  'trace test', {callStack: true});
+      testOutputContents('trace', 'trace test', {callStack: true});
     });
 
     it('Output a debug log.', () => {
-      // Since `trace` shares the same definition as `debug`, `debug` is being redefined.
-      const provider = {
-        debug: vi.fn(),
-      }
-      testOutputContents(provider, 'debug', 'debug', 'debug test');
+      testOutputContents('debug', 'debug test');
     });
 
     it('Output a info log.', () => {
-      const provider = {
-        info: vi.fn(),
-      };
-      testOutputContents(provider, 'info', 'info', 'info test');
+      testOutputContents('info', 'info test');
     });
 
     it('Output a warn log.', () => {
-      const provider = {
-        warn: vi.fn(),
-      };
-      testOutputContents(provider, 'warn', 'warn', 'warn test');
+      testOutputContents('warn', 'warn test');
     });
 
     it('Output a error log.', () => {
-      const provider = {
-        error: vi.fn(),
-      };
-      testOutputContents(provider, 'error', 'error', 'error test');
+      testOutputContents('error', 'error test');
     });
 
     it('Output a fatal error log.', () => {
-      const provider = {
-        error: vi.fn(),
-      };
-      testOutputContents(provider, 'fatal', 'error', 'fatal test');
+      testOutputContents('fatal', 'fatal test');
     });
 
-    const checkInvalidProperty = (key, values) => {
+    const checkInvalidProperty = (key: ConfigKey , values: any[]) => {
       const logger = new PrettyConsole();
       values.forEach((v) => {
-        const config = {};
+        const config: Config = {};
         config[key] = v;
         expect(() => logger.setConfig(config)).toThrow(Error);
         expect(() => logger.setConfig(config)).toThrow(`Type mismatch for config.${key}`);
